@@ -6,7 +6,8 @@ interface SharedPageProps {
 }
 
 async function getBirthday(slug: string): Promise<BirthdayFormData | null> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/birthdays/${encodeURIComponent(slug)}`, {
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const response = await fetch(`${appUrl}/api/birthdays/${encodeURIComponent(slug)}`, {
     cache: "no-store",
   });
   if (!response.ok) return null;
