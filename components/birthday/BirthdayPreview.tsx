@@ -85,23 +85,6 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     }
   }
 
-  async function toDataUrl(url: string) {
-    if (url.startsWith("data:")) return url;
-    const response = await fetch(url).catch(() => {
-      throw new Error("Could not read a selected photo or music file. Please remove it and select it again.");
-    });
-    if (!response.ok) {
-      throw new Error("Could not read a selected photo or music file. Please select it again.");
-    }
-    const blob = await response.blob();
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-  }
-
   async function createShareLink() {
     if (isSharing || shareUrl) return;
     setIsSharing(true);
@@ -109,8 +92,8 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     try {
       const shareData = {
         ...data,
-        memories: await Promise.all(data.memories.map(async (memory) => ({ ...memory, url: await toDataUrl(memory.url) }))),
-        music: data.music ? { ...data.music, url: await toDataUrl(data.music.url) } : null,
+        memories: data.memories,
+        music: data.music,
       };
       const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
       const response = await fetch("/api/birthdays", {

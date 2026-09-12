@@ -32,6 +32,15 @@ function createMemoryId() {
     : `memory-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export function BirthdayWizard() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<BirthdayFormData>(INITIAL_DATA);
@@ -60,15 +69,15 @@ export function BirthdayWizard() {
     setData((current) => ({ ...current, ...changes }));
   }
 
-  function handleAddMemories(files: File[]) {
+  async function handleAddMemories(files: File[]) {
     if (files.length === 0) {
       return;
     }
-    const newMemories = Array.from(files).map((file) => ({
+    const newMemories = await Promise.all(Array.from(files).map(async (file) => ({
       id: createMemoryId(),
       fileName: file.name,
-      url: URL.createObjectURL(file),
-    }));
+      url: await fileToDataUrl(file),
+    })));
     updateData({ memories: [...data.memories, ...newMemories].slice(0, 5) });
   }
 
@@ -80,11 +89,11 @@ export function BirthdayWizard() {
     updateData({ memories: data.memories.filter((item) => item.id !== id) });
   }
 
-  function handleMusicChange(file: File | null) {
+  async function handleMusicChange(file: File | null) {
     if (data.music) {
       URL.revokeObjectURL(data.music.url);
     }
-    updateData({ music: file ? { fileName: file.name, url: URL.createObjectURL(file) } : null });
+    updateData({ music: file ? { fileName: file.name, url: await fileToDataUrl(file) } : null });
   }
 
   function reset() {
