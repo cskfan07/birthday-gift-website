@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ error: "Supabase environment variables are missing" }, { status: 500 });
     }
+    const baseUrl = supabaseUrl.replace(/\/+$/, "");
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -18,24 +19,35 @@ export async function POST(request: Request) {
     }
 
     const safePath = path.replace(/[^a-zA-Z0-9._/-]/g, "-");
-    const response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": file.type || "application/octet-stream",
-      },
-      body: await file.arrayBuffer(),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    let response: Response;
+    try {
+      response = await fetch(`${baseUrl}/storage/v1/object/birthday-media/${safePath}`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": file.type || "application/octet-stream",
+          "x-upsert": "true",
+          "cache-control": "3600",
+        },
+        body: await file.arrayBuffer(),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
       const details = await response.text();
       return NextResponse.json({ error: `Supabase media upload failed: ${details.slice(0, 300)}` }, { status: response.status });
     }
 
-    return NextResponse.json({ url: `${supabaseUrl}/storage/v1/object/public/birthday-media/${safePath}` });
+    return NextResponse.json({ url: `${baseUrl}/storage/v1/object/public/birthday-media/${safePath}` });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown media upload error";
+    const cause = error instanceof Error && error.cause instanceof Error ? ` (${error.cause.message})` : "";
+    const message = error instanceof Error ? `${error.message}${cause}` : "Unknown media upload error";
     return NextResponse.json({ error: `Media upload failed: ${message}` }, { status: 502 });
   }
 }
