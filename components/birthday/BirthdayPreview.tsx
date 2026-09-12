@@ -122,6 +122,7 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
   const [shareError, setShareError] = useState("");
   const [shareNotice, setShareNotice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -179,11 +180,35 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
       }
       const url = `${window.location.origin}/s/${slug}`;
       setShareUrl(url);
-      await navigator.clipboard?.writeText(url);
+      setIsCopied(false);
     } catch (error) {
       setShareError(error instanceof Error ? error.message : "Could not create share link");
     } finally {
       setIsSharing(false);
+    }
+  }
+
+  async function copyShareLink() {
+    if (!shareUrl || isCopied) return;
+    setShareError("");
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = shareUrl;
+        textarea.setAttribute("readonly", "true");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand("copy");
+        textarea.remove();
+        if (!copied) throw new Error("Copy was blocked by this browser.");
+      }
+      setIsCopied(true);
+    } catch {
+      setShareError("Copy was blocked. Please copy this link manually: " + shareUrl);
     }
   }
 
@@ -215,11 +240,11 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
 
         {!isShared ? <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs text-pink-50">
-            {shareError ? <span className="text-rose-200">{shareError}</span> : shareNotice ? <span className="text-amber-200">{shareNotice}</span> : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
+            {shareError ? <span className="text-rose-200">{shareError}</span> : shareNotice ? <span className="text-amber-200">{shareNotice}</span> : isCopied ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : shareUrl ? "Share link ready. Tap Copy share link." : "Share this birthday preview with one link."}
           </div>
-          <Button type="button" variant="secondary" onClick={createShareLink} disabled={isSharing || Boolean(shareUrl)}>
-            {shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-            {isSharing ? "Creating..." : shareUrl ? "Copied" : "Copy share link"}
+          <Button type="button" variant="secondary" onClick={shareUrl ? copyShareLink : createShareLink} disabled={isSharing || isCopied}>
+            {isCopied ? <Check className="h-4 w-4" /> : shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            {isSharing ? "Creating..." : isCopied ? "Copied" : shareUrl ? "Copy share link" : "Create share link"}
           </Button>
         </div> : null}
 
