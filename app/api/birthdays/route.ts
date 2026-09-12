@@ -13,6 +13,8 @@ export async function POST(request: Request) {
   try {
     const { url, key } = supabaseConfig();
     const body = await request.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     const response = await fetch(`${url}/rest/v1/birthdays`, {
       method: "POST",
       headers: {
@@ -22,7 +24,8 @@ export async function POST(request: Request) {
         Prefer: "return=minimal",
       },
       body: JSON.stringify({ slug: body.slug, data: body.data }),
-    });
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       const details = await response.text();

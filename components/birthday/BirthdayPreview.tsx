@@ -90,19 +90,26 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     setIsSharing(true);
     setShareError("");
     try {
+      const mediaSize = data.memories.reduce((total, memory) => total + memory.url.length, 0) + (data.music?.url.length ?? 0);
+      if (mediaSize > 5_000_000) {
+        throw new Error("Photos/music are too large for one share link. Remove the music or use a shorter audio file.");
+      }
       const shareData = {
         ...data,
         memories: data.memories,
         music: data.music,
       };
       const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 15000);
       const response = await fetch("/api/birthdays", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, data: shareData }),
+        signal: controller.signal,
       }).catch(() => {
         throw new Error("Share API network error. Please redeploy the latest Vercel version and try again.");
-      });
+      }).finally(() => window.clearTimeout(timeout));
       if (!response.ok) {
         const result = (await response.json().catch(() => null)) as { error?: string } | null;
         throw new Error(result?.error || "Could not create share link");
