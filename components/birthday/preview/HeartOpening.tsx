@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Heart, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { Button } from "@/components/ui/Button";
+import { InteractiveHeartScene } from "@/components/birthday/interactive/InteractiveHeartScene";
 
-type IntroPhase = "arrow" | "hit" | "burst" | "message";
+type IntroPhase = "interactive" | "message";
 
 interface HeartOpeningProps {
   name: string;
@@ -171,85 +172,18 @@ function TreeGrowth() {
   return <canvas ref={canvasRef} className="mt-4 h-[20rem] w-full sm:h-[30rem]" aria-label="Animated heart tree" />;
 }
 
-function BrokenHeart() {
-  return (
-    <div className="relative h-28 w-32">
-      <motion.div
-        initial={{ x: 0, rotate: 0, opacity: 1 }}
-        animate={{ x: -32, rotate: -16, opacity: 0.9 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute inset-0 overflow-hidden"
-        style={{ clipPath: "inset(0 50% 0 0)" }}
-      >
-        <Heart className="h-28 w-32 fill-pink-300 text-pink-100" />
-      </motion.div>
-      <motion.div
-        initial={{ x: 0, rotate: 0, opacity: 1 }}
-        animate={{ x: 32, rotate: 16, opacity: 0.9 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute inset-0 overflow-hidden"
-        style={{ clipPath: "inset(0 0 0 50%)" }}
-      >
-        <Heart className="h-28 w-32 fill-pink-300 text-pink-100" />
-      </motion.div>
-    </div>
-  );
-}
-
 export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
-  const [phase, setPhase] = useState<IntroPhase>("arrow");
-
-  useEffect(() => {
-    const timers = [
-      window.setTimeout(() => setPhase("hit"), 900),
-      window.setTimeout(() => setPhase("burst"), 1500),
-      window.setTimeout(() => setPhase("message"), 2550),
-    ];
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, []);
+  const [phase, setPhase] = useState<IntroPhase>("interactive");
+  const handleImpact = useCallback(() => setPhase("message"), []);
 
   return (
     <section className="soft-panel relative min-h-[640px] overflow-hidden rounded-[2rem] p-6 text-center sm:p-10">
       <div className="pointer-events-none absolute left-[12%] top-[14%] text-xl text-pink-200/70">{String.fromCodePoint(0x2728)}</div>
       <div className="pointer-events-none absolute right-[16%] top-[25%] text-sm text-pink-100/60">{String.fromCodePoint(0x2726)}</div>
       <div className="relative flex min-h-[580px] flex-col items-center justify-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/65">Before the surprise begins</p>
-
-        <div className="relative mt-12 flex h-32 items-center justify-center">
-          <AnimatePresence mode="wait">
-            {phase === "arrow" || phase === "hit" ? (
-              <motion.div
-                key="heart"
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: phase === "hit" ? [1, 1.12, 0.96] : 1, opacity: 1 }}
-                transition={{ duration: phase === "hit" ? 0.5 : 0.6 }}
-                className="relative"
-              >
-                <Heart className="h-28 w-32 fill-rose-400 text-pink-100 shadow-[0_0_45px_rgba(244,114,154,0.65)]" />
-                {phase === "hit" ? (
-                  <motion.span
-                    initial={{ scale: 0, opacity: 1 }}
-                    animate={{ scale: 2.3, opacity: 0 }}
-                    transition={{ duration: 0.65 }}
-                    className="absolute inset-0 rounded-full border-2 border-pink-100/80"
-                  />
-                ) : null}
-              </motion.div>
-            ) : null}
-            {phase === "burst" ? <BrokenHeart key="broken-heart" /> : null}
-          </AnimatePresence>
-
-          {phase === "arrow" ? (
-            <motion.div
-              initial={{ x: -150, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="absolute left-1/2 top-1/2 -translate-x-[10%] -translate-y-1/2 text-white"
-            >
-              <ArrowRight className="h-12 w-12 rotate-[-8deg] text-pink-100 drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]" />
-            </motion.div>
-          ) : null}
-        </div>
+        <AnimatePresence mode="wait">
+          {phase === "interactive" ? <InteractiveHeartScene key="interactive-heart" onComplete={handleImpact} /> : null}
+        </AnimatePresence>
 
         <AnimatePresence>
           {phase === "message" ? (
