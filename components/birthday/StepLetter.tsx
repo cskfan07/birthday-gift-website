@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FileHeart, Music2, PenLine, Upload, X } from "lucide-react";
 
 import { READY_LETTERS } from "@/lib/birthday-options";
