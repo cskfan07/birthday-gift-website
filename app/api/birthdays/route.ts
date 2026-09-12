@@ -25,7 +25,15 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "Could not save birthday" }, { status: response.status });
+      const details = await response.text();
+      let message = "Could not save birthday";
+      try {
+        const parsed = JSON.parse(details) as { message?: string; hint?: string; code?: string };
+        message = [parsed.message, parsed.hint, parsed.code ? `Code: ${parsed.code}` : ""].filter(Boolean).join(" ") || message;
+      } catch {
+        message = details || message;
+      }
+      return NextResponse.json({ error: message.slice(0, 500) }, { status: response.status });
     }
 
     return NextResponse.json({ ok: true });

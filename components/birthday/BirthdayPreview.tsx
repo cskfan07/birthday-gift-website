@@ -60,6 +60,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [shareError, setShareError] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -99,6 +100,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
   async function createShareLink() {
     if (isSharing || shareUrl) return;
     setIsSharing(true);
+    setShareError("");
     try {
       const shareData = {
         ...data,
@@ -111,12 +113,15 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, data: shareData }),
       });
-      if (!response.ok) throw new Error("Could not create share link");
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(result?.error || "Could not create share link");
+      }
       const url = `${window.location.origin}/s/${slug}`;
       setShareUrl(url);
       await navigator.clipboard?.writeText(url);
-    } catch {
-      setShareUrl("error");
+    } catch (error) {
+      setShareError(error instanceof Error ? error.message : "Could not create share link");
     } finally {
       setIsSharing(false);
     }
@@ -150,11 +155,11 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
 
         <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs text-pink-50">
-            {shareUrl === "error" ? "Could not create a share link. Check Supabase policies." : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
+            {shareError ? <span className="text-rose-200">{shareError}</span> : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
           </div>
           <Button type="button" variant="secondary" onClick={createShareLink} disabled={isSharing || Boolean(shareUrl)}>
-            {shareUrl && shareUrl !== "error" ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-            {isSharing ? "Creating..." : shareUrl && shareUrl !== "error" ? "Copied" : "Copy share link"}
+            {shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            {isSharing ? "Creating..." : shareUrl ? "Copied" : "Copy share link"}
           </Button>
         </div>
 
