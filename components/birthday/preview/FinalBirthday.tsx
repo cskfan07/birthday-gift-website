@@ -11,9 +11,10 @@ interface FinalBirthdayProps {
   yourName: string;
   age: string;
   onRestart: () => void;
+  isShared?: boolean;
 }
 
-export function FinalBirthday({ name, yourName, age, onRestart }: FinalBirthdayProps) {
+export function FinalBirthday({ name, yourName, age, onRestart, isShared = false }: FinalBirthdayProps) {
   const [showGift, setShowGift] = useState(false);
   return (
     <section className="soft-panel relative min-h-[640px] overflow-hidden rounded-[2rem] p-5 text-center sm:p-10">
@@ -61,7 +62,7 @@ export function FinalBirthday({ name, yourName, age, onRestart }: FinalBirthdayP
         </Button>
         <Button type="button" variant="secondary" onClick={onRestart} className="mt-7">
           <RotateCcw className="h-4 w-4" />
-          Make another surprise
+          {isShared ? "Play again" : "Make another surprise"}
         </Button>
       </div>
       {showGift ? <GiftSurprise onClose={() => setShowGift(false)} /> : null}

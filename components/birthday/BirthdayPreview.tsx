@@ -17,6 +17,7 @@ type PreviewScene = "opening" | "balloons" | "memories" | "letter" | "final";
 interface BirthdayPreviewProps {
   data: BirthdayFormData;
   onRestart: () => void;
+  isShared?: boolean;
 }
 
 const SCENE_LABELS: { id: PreviewScene; label: string }[] = [
@@ -86,7 +87,7 @@ async function uploadMedia(dataUrl: string, path: string) {
   return result.url;
 }
 
-export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
+export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayPreviewProps) {
   const [scene, setScene] = useState<PreviewScene>("opening");
   const [popped, setPopped] = useState<boolean[]>([false, false, false, false, false]);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -131,11 +132,8 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
           ...memory,
           url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`),
         }))),
-        music: null,
+        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`) } : null,
       };
-      if (data.music) {
-        setShareNotice("Share link me music include nahi hui, lekin current preview me music chalti rahegi.");
-      }
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);
       const response = await fetch("/api/birthdays", {
@@ -175,7 +173,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     <main className="min-h-screen px-4 py-5 sm:px-8 sm:py-8">
       <AmbientMotion />
       <div className="mx-auto max-w-6xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
+        {!isShared ? <header className="mb-6 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-pink-100/65">Private preview</p>
             <p className="mt-2 text-sm text-[#c9b8c7]">A birthday story made for {data.theirName}.</p>
@@ -184,9 +182,9 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
             <RotateCcw className="h-4 w-4" />
             Start again
           </Button>
-        </header>
+        </header> : null}
 
-        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        {!isShared ? <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs text-pink-50">
             {shareError ? <span className="text-rose-200">{shareError}</span> : shareNotice ? <span className="text-amber-200">{shareNotice}</span> : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
           </div>
@@ -194,7 +192,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
             {shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
             {isSharing ? "Creating..." : shareUrl ? "Copied" : "Copy share link"}
           </Button>
-        </div>
+        </div> : null}
 
         {data.music ? (
           <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3">
@@ -214,6 +212,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
               ref={audioRef}
               src={data.music.url}
               loop
+              autoPlay
               onPlay={() => setIsMusicPlaying(true)}
               onPause={() => setIsMusicPlaying(false)}
               className="hidden"
@@ -273,6 +272,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
                 yourName={data.yourName}
                 age={data.turningAge}
                 onRestart={onRestart}
+                isShared={isShared}
               />
             ) : null}
           </motion.div>
