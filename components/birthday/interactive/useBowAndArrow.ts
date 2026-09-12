@@ -106,7 +106,7 @@ export function useBowAndArrow(containerRef: RefObject<HTMLDivElement | null>, o
     Matter.Body.setPosition(arrow, { x: arrow.position.x, y: arrow.position.y });
     Matter.Body.setVelocity(arrow, { x: 7 + pull * 0.095, y: -0.8 });
     Matter.Body.setAngle(arrow, -0.04);
-    Matter.Body.setAngularVelocity(0);
+    Matter.Body.setAngularVelocity(arrow, 0);
     setSceneState({ ...stateRef.current, pull: 0, isDragging: false, isFlying: true });
   }, [setSceneState]);
 
