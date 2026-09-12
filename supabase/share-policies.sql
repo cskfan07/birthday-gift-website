@@ -33,3 +33,23 @@ on public.birthdays
 for select
 to anon
 using (true);
+
+-- Public bucket for shared birthday photos and music
+insert into storage.buckets (id, name, public)
+values ('birthday-media', 'birthday-media', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Allow public birthday media upload" on storage.objects;
+drop policy if exists "Allow public birthday media read" on storage.objects;
+
+create policy "Allow public birthday media upload"
+on storage.objects
+for insert
+to anon
+with check (bucket_id = 'birthday-media');
+
+create policy "Allow public birthday media read"
+on storage.objects
+for select
+to anon
+using (bucket_id = 'birthday-media');

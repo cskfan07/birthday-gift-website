@@ -54,6 +54,26 @@ function AmbientMotion() {
   );
 }
 
+async function uploadMedia(dataUrl: string, path: string, supabaseUrl: string, supabaseKey: string) {
+  const blob = await fetch(dataUrl).then((response) => response.blob());
+  const safePath = path.replace(/[^a-zA-Z0-9._/-]/g, "-");
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": blob.type || "application/octet-stream",
+      "x-upsert": "true",
+    },
+    body: blob,
+  });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Media upload failed: ${details.slice(0, 220)}`);
+  }
+  return `${supabaseUrl}/storage/v1/object/public/birthday-media/${safePath}`;
+}
+
 export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
   const [scene, setScene] = useState<PreviewScene>("opening");
   const [popped, setPopped] = useState<boolean[]>([false, false, false, false, false]);
@@ -90,16 +110,18 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     setIsSharing(true);
     setShareError("");
     try {
-      const mediaSize = data.memories.reduce((total, memory) => total + memory.url.length, 0) + (data.music?.url.length ?? 0);
-      if (mediaSize > 5_000_000) {
-        throw new Error("Photos/music are too large for one share link. Remove the music or use a shorter audio file.");
-      }
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) throw new Error("Supabase environment variables are missing on Vercel.");
+      const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
       const shareData = {
         ...data,
-        memories: data.memories,
-        music: data.music,
+        memories: await Promise.all(data.memories.map(async (memory, index) => ({
+          ...memory,
+          url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`, supabaseUrl, supabaseKey),
+        }))),
+        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`, supabaseUrl, supabaseKey) } : null,
       };
-      const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);
       const response = await fetch("/api/birthdays", {
