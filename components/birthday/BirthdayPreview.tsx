@@ -93,6 +93,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
   const [isSharing, setIsSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [shareError, setShareError] = useState("");
+  const [shareNotice, setShareNotice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     if (isSharing || shareUrl) return;
     setIsSharing(true);
     setShareError("");
+    setShareNotice("");
     try {
       const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
       const shareData = {
@@ -129,8 +131,11 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
           ...memory,
           url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`),
         }))),
-        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`) } : null,
+        music: null,
       };
+      if (data.music) {
+        setShareNotice("Share link me music include nahi hui, lekin current preview me music chalti rahegi.");
+      }
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);
       const response = await fetch("/api/birthdays", {
@@ -183,7 +188,7 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
 
         <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs text-pink-50">
-            {shareError ? <span className="text-rose-200">{shareError}</span> : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
+            {shareError ? <span className="text-rose-200">{shareError}</span> : shareNotice ? <span className="text-amber-200">{shareNotice}</span> : shareUrl ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : "Share this birthday preview with one link."}
           </div>
           <Button type="button" variant="secondary" onClick={createShareLink} disabled={isSharing || Boolean(shareUrl)}>
             {shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
