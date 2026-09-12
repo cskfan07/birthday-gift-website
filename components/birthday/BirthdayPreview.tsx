@@ -55,18 +55,33 @@ function AmbientMotion() {
 }
 
 async function uploadMedia(dataUrl: string, path: string, supabaseUrl: string, supabaseKey: string) {
-  const blob = await fetch(dataUrl).then((response) => response.blob());
+  let blob: Blob;
+  try {
+    blob = await fetch(dataUrl).then((response) => response.blob());
+  } catch {
+    throw new Error("Could not prepare the selected photo or music file for sharing.");
+  }
   const safePath = path.replace(/[^a-zA-Z0-9._/-]/g, "-");
-  const response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
-    method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": blob.type || "application/octet-stream",
-      "x-upsert": "true",
-    },
-    body: blob,
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 20000);
+  let response: Response;
+  try {
+    response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": blob.type || "application/octet-stream",
+        "x-upsert": "true",
+      },
+      body: blob,
+      signal: controller.signal,
+    });
+  } catch {
+    throw new Error("Supabase Storage is unreachable. Check the birthday-media bucket and Vercel environment variables.");
+  } finally {
+    window.clearTimeout(timeout);
+  }
   if (!response.ok) {
     const details = await response.text();
     throw new Error(`Media upload failed: ${details.slice(0, 220)}`);
