@@ -41,6 +41,37 @@ function fileToDataUrl(file: File) {
   });
 }
 
+function compressImage(file: File) {
+  return new Promise<{ fileName: string; url: string }>((resolve, reject) => {
+    const image = new Image();
+    const sourceUrl = URL.createObjectURL(file);
+    image.onload = () => {
+      URL.revokeObjectURL(sourceUrl);
+      const maxDimension = 1280;
+      const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const context = canvas.getContext("2d");
+      if (!context) {
+        reject(new Error("Could not compress image"));
+        return;
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const webpUrl = canvas.toDataURL("image/webp", 0.72);
+      const isWebp = webpUrl.startsWith("data:image/webp");
+      const url = isWebp ? webpUrl : canvas.toDataURL("image/jpeg", 0.72);
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      resolve({ fileName: `${baseName}.${isWebp ? "webp" : "jpg"}`, url });
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(sourceUrl);
+      reject(new Error("Could not read image"));
+    };
+    image.src = sourceUrl;
+  });
+}
+
 export function BirthdayWizard() {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<BirthdayFormData>(INITIAL_DATA);
@@ -73,11 +104,10 @@ export function BirthdayWizard() {
     if (files.length === 0) {
       return;
     }
-    const newMemories = await Promise.all(Array.from(files).map(async (file) => ({
-      id: createMemoryId(),
-      fileName: file.name,
-      url: await fileToDataUrl(file),
-    })));
+    const newMemories = await Promise.all(Array.from(files).map(async (file) => {
+      const compressed = await compressImage(file);
+      return { id: createMemoryId(), ...compressed };
+    }));
     updateData({ memories: [...data.memories, ...newMemories].slice(0, 5) });
   }
 
