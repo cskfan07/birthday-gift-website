@@ -117,7 +117,7 @@ export function useBowAndArrow(containerRef: RefObject<HTMLDivElement | null>, o
     Matter.Body.setPosition(physicsRef.current.arrow, { x, y });
     Matter.Body.setVelocity(physicsRef.current.arrow, { x: 0, y: 0 });
     Matter.Body.setAngle(physicsRef.current.arrow, 0);
-    Matter.Composite.remove(physicsRef.current.engine.world, physicsRef.current.fragments);
+    physicsRef.current.fragments.forEach((fragment) => Matter.Composite.remove(physicsRef.current?.engine.world, fragment));
     physicsRef.current.fragments = [];
     setSceneState({ ...INITIAL_STATE, arrow: { x, y, angle: 0 } });
   }, [containerRef, setSceneState]);
