@@ -20,6 +20,7 @@ function isFlipkartUrl(value: string) {
 
 export function GiftSurprise({ onClose }: GiftSurpriseProps) {
   const [link, setLink] = useState("");
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -46,7 +47,7 @@ export function GiftSurprise({ onClose }: GiftSurpriseProps) {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ flipkart_link: trimmedLink, _subject: "New birthday gift request" }),
+        body: JSON.stringify({ flipkart_link: trimmedLink, gift_message: message.trim(), _subject: "New birthday gift request" }),
       });
       if (!response.ok) throw new Error("Gift request failed");
       setSent(true);
@@ -80,6 +81,8 @@ export function GiftSurprise({ onClose }: GiftSurpriseProps) {
             <p className="mt-3 text-sm leading-6 text-[#d9c9d8]">Flipkart par apni pasand ka koi bhi product <strong className="text-white">₹500 ke andar</strong> choose karo, phir uska link yahan paste karo.</p>
             <label htmlFor="flipkart-link" className="mt-6 block text-xs font-semibold uppercase tracking-[0.2em] text-pink-100/70">Paste Flipkart Product Link</label>
             <input id="flipkart-link" type="url" value={link} onChange={(event) => { setLink(event.target.value); setError(""); }} placeholder="Paste your Flipkart link here..." className="soft-input mt-2 h-12 w-full rounded-xl px-4 text-sm" required />
+            <label htmlFor="gift-message" className="mt-5 block text-xs font-semibold uppercase tracking-[0.2em] text-pink-100/70">Add a message (optional)</label>
+            <textarea id="gift-message" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a little message..." maxLength={500} className="soft-input mt-2 min-h-24 w-full resize-y rounded-xl px-4 py-3 text-sm" />
             {error ? <p className="mt-2 text-xs text-rose-200">{error}</p> : null}
             <Button type="submit" disabled={isSending} className="mt-6 w-full">
               {isSending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
