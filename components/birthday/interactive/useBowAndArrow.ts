@@ -46,7 +46,8 @@ export function useBowAndArrow(containerRef: RefObject<HTMLDivElement | null>, o
         impactRef.current = true;
         const leftFragment = Matter.Bodies.polygon(target.position.x - 22, target.position.y + 4, 3, 27, { label: "heart-fragment", frictionAir: 0.02 });
         const rightFragment = Matter.Bodies.polygon(target.position.x + 22, target.position.y + 4, 3, 27, { label: "heart-fragment", frictionAir: 0.02 });
-        Matter.Composite.add(engine.world, [leftFragment, rightFragment]);
+        Matter.Composite.add(engine.world, leftFragment);
+        Matter.Composite.add(engine.world, rightFragment);
         physicsRef.current!.fragments = [leftFragment, rightFragment];
         Matter.Body.setVelocity(leftFragment, { x: -2.2, y: -2.5 });
         Matter.Body.setVelocity(rightFragment, { x: 2.2, y: -2.5 });
@@ -110,15 +111,16 @@ export function useBowAndArrow(containerRef: RefObject<HTMLDivElement | null>, o
   }, [setSceneState]);
 
   const reset = useCallback(() => {
-    if (!physicsRef.current || !containerRef.current) return;
+    const physics = physicsRef.current;
+    if (!physics || !containerRef.current) return;
     impactRef.current = false;
     const x = containerRef.current.clientWidth * 0.27;
     const y = containerRef.current.clientHeight * 0.58;
-    Matter.Body.setPosition(physicsRef.current.arrow, { x, y });
-    Matter.Body.setVelocity(physicsRef.current.arrow, { x: 0, y: 0 });
-    Matter.Body.setAngle(physicsRef.current.arrow, 0);
-    physicsRef.current.fragments.forEach((fragment) => Matter.Composite.remove(physicsRef.current?.engine.world, fragment));
-    physicsRef.current.fragments = [];
+    Matter.Body.setPosition(physics.arrow, { x, y });
+    Matter.Body.setVelocity(physics.arrow, { x: 0, y: 0 });
+    Matter.Body.setAngle(physics.arrow, 0);
+    physics.fragments.forEach((fragment) => Matter.Composite.remove(physics.engine.world, fragment));
+    physics.fragments = [];
     setSceneState({ ...INITIAL_STATE, arrow: { x, y, angle: 0 } });
   }, [containerRef, setSceneState]);
 
