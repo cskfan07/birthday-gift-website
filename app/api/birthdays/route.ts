@@ -37,7 +37,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "Could not save birthday" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown Supabase connection error";
+    return NextResponse.json({ error: `Supabase connection failed: ${message}` }, { status: 502 });
   }
 }

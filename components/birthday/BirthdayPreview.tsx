@@ -87,7 +87,12 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
 
   async function toDataUrl(url: string) {
     if (url.startsWith("data:")) return url;
-    const response = await fetch(url);
+    const response = await fetch(url).catch(() => {
+      throw new Error("Could not read a selected photo or music file. Please remove it and select it again.");
+    });
+    if (!response.ok) {
+      throw new Error("Could not read a selected photo or music file. Please select it again.");
+    }
     const blob = await response.blob();
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -112,6 +117,8 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, data: shareData }),
+      }).catch(() => {
+        throw new Error("Share API network error. Please redeploy the latest Vercel version and try again.");
       });
       if (!response.ok) {
         const result = (await response.json().catch(() => null)) as { error?: string } | null;
