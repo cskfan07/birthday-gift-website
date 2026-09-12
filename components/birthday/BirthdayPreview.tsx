@@ -87,6 +87,35 @@ async function uploadMedia(dataUrl: string, path: string) {
   return result.url;
 }
 
+async function uploadAudioDirect(dataUrl: string, path: string) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/, "");
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase environment variables are missing for audio upload.");
+  }
+
+  const blob = await fetch(dataUrl).then((response) => response.blob());
+  const extension = path.split(".").pop()?.toLowerCase();
+  const contentType = blob.type || (extension === "mp3" ? "audio/mpeg" : extension === "wav" ? "audio/wav" : extension === "m4a" ? "audio/mp4" : "application/octet-stream");
+  const safePath = path.replace(/[^a-zA-Z0-9._/-]/g, "-");
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      "Content-Type": contentType,
+      "x-upsert": "true",
+      "cache-control": "3600",
+    },
+    body: blob,
+  });
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Audio upload failed: ${details.slice(0, 300)}`);
+  }
+  return `${supabaseUrl}/storage/v1/object/public/birthday-media/${safePath}`;
+}
+
 export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayPreviewProps) {
   const [scene, setScene] = useState<PreviewScene>("opening");
   const [popped, setPopped] = useState<boolean[]>([false, false, false, false, false]);
@@ -132,7 +161,7 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
           ...memory,
           url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`),
         }))),
-        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`) } : null,
+        music: data.music ? { ...data.music, url: await uploadAudioDirect(data.music.url, `${slug}/music-${data.music.fileName}`) } : null,
       };
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);

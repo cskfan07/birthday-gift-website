@@ -15,6 +15,29 @@ interface StepLetterProps {
 }
 
 export function StepLetter({ letter, music, onChange, onMusicChange, onPrevious, onFinish, isLoading = false }: StepLetterProps) {
+  const [musicError, setMusicError] = useState("");
+
+  function handleMusicFile(file: File | null) {
+    if (!file) {
+      setMusicError("");
+      onMusicChange(null);
+      return;
+    }
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    const supportedTypes = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/mp4", "audio/x-m4a"];
+    const supportedExtensions = ["mp3", "wav", "m4a"];
+    if (!supportedTypes.includes(file.type) && !supportedExtensions.includes(extension ?? "")) {
+      setMusicError("Only MP3, WAV, and M4A audio files are supported.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setMusicError("Music file must be under 50 MB.");
+      return;
+    }
+    setMusicError("");
+    onMusicChange(file);
+  }
+
   return (
     <StepShell
       eyebrow="Step 5 of 5 · The letter"
@@ -80,9 +103,9 @@ export function StepLetter({ letter, music, onChange, onMusicChange, onPrevious,
             {music ? "Change music" : "Choose audio"}
             <input
               type="file"
-              accept="audio/*"
+              accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a"
               className="sr-only"
-              onChange={(event) => onMusicChange(event.target.files?.[0] ?? null)}
+              onChange={(event) => handleMusicFile(event.target.files?.[0] ?? null)}
             />
           </label>
           {music ? (
@@ -99,6 +122,7 @@ export function StepLetter({ letter, music, onChange, onMusicChange, onPrevious,
             </div>
           ) : null}
         </div>
+        {musicError ? <p className="mt-2 text-xs text-rose-200">{musicError}</p> : null}
       </div>
     </StepShell>
   );
