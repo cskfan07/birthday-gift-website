@@ -54,39 +54,36 @@ function AmbientMotion() {
   );
 }
 
-async function uploadMedia(dataUrl: string, path: string, supabaseUrl: string, supabaseKey: string) {
+async function uploadMedia(dataUrl: string, path: string) {
   let blob: Blob;
   try {
     blob = await fetch(dataUrl).then((response) => response.blob());
   } catch {
     throw new Error("Could not prepare the selected photo or music file for sharing.");
   }
-  const safePath = path.replace(/[^a-zA-Z0-9._/-]/g, "-");
+  const formData = new FormData();
+  formData.append("file", blob, path.split("/").pop() || "media-file");
+  formData.append("path", path);
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 20000);
   let response: Response;
   try {
-    response = await fetch(`${supabaseUrl}/storage/v1/object/birthday-media/${safePath}`, {
+    response = await fetch("/api/media", {
       method: "POST",
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        "Content-Type": blob.type || "application/octet-stream",
-        "x-upsert": "true",
-      },
-      body: blob,
+      body: formData,
       signal: controller.signal,
     });
   } catch {
-    throw new Error("Supabase Storage is unreachable. Check the birthday-media bucket and Vercel environment variables.");
+    throw new Error("Media upload API is unreachable. Please wait for the latest Vercel deployment and try again.");
   } finally {
     window.clearTimeout(timeout);
   }
   if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`Media upload failed: ${details.slice(0, 220)}`);
+    const result = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(result?.error || "Media upload failed.");
   }
-  return `${supabaseUrl}/storage/v1/object/public/birthday-media/${safePath}`;
+  const result = (await response.json()) as { url: string };
+  return result.url;
 }
 
 export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
@@ -125,17 +122,14 @@ export function BirthdayPreview({ data, onRestart }: BirthdayPreviewProps) {
     setIsSharing(true);
     setShareError("");
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (!supabaseUrl || !supabaseKey) throw new Error("Supabase environment variables are missing on Vercel.");
       const slug = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
       const shareData = {
         ...data,
         memories: await Promise.all(data.memories.map(async (memory, index) => ({
           ...memory,
-          url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`, supabaseUrl, supabaseKey),
+          url: await uploadMedia(memory.url, `${slug}/memory-${index}-${memory.fileName}`),
         }))),
-        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`, supabaseUrl, supabaseKey) } : null,
+        music: data.music ? { ...data.music, url: await uploadMedia(data.music.url, `${slug}/music-${data.music.fileName}`) } : null,
       };
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 15000);
