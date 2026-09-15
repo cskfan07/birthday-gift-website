@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -10,7 +13,48 @@ interface MemoryRevealProps {
 }
 
 export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
-  const carouselMemories = memories.length > 0 ? [...memories, ...memories] : [];
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [cardScales, setCardScales] = useState<number[]>(() => memories.map(() => 0.94));
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || memories.length === 0) {
+      return;
+    }
+
+    const activeScroller = scroller;
+    let frameId = 0;
+    function updateScales() {
+      const bounds = activeScroller.getBoundingClientRect();
+      const centerX = bounds.left + bounds.width / 2;
+      const nextScales = cardRefs.current.slice(0, memories.length).map((card) => {
+        if (!card) {
+          return 0.94;
+        }
+        const cardBounds = card.getBoundingClientRect();
+        const cardCenter = cardBounds.left + cardBounds.width / 2;
+        const distance = Math.abs(centerX - cardCenter);
+        const closeness = Math.max(0, 1 - distance / Math.max(bounds.width * 0.42, 1));
+        return 0.92 + closeness * 0.24;
+      });
+      setCardScales(nextScales);
+    }
+
+    function requestScaleUpdate() {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(updateScales);
+    }
+
+    requestScaleUpdate();
+    activeScroller.addEventListener("scroll", requestScaleUpdate, { passive: true });
+    window.addEventListener("resize", requestScaleUpdate);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      activeScroller.removeEventListener("scroll", requestScaleUpdate);
+      window.removeEventListener("resize", requestScaleUpdate);
+    };
+  }, [memories.length]);
 
   return (
     <section className="soft-panel flex h-full min-h-0 items-center overflow-hidden rounded-[1.5rem] p-3 sm:rounded-[2rem] sm:p-5">
@@ -30,12 +74,19 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
           </div>
 
           {memories.length > 0 ? (
-            <div className="memory-carousel overflow-hidden py-2">
-              <div className="memory-carousel-track flex w-max gap-3 sm:gap-4">
-                {carouselMemories.map((memory, index) => (
+            <div ref={scrollerRef} className="memory-focus-scroller flex snap-x snap-mandatory gap-3 overflow-x-auto px-[calc(50%-4rem)] py-4 sm:gap-5 sm:px-[calc(50%-5.5rem)]">
+                {memories.map((memory, index) => (
                   <div
-                    key={`${memory.id}-${index}`}
-                    className="memory-carousel-card relative h-[clamp(8rem,30dvh,18rem)] w-[clamp(7rem,18vw,11rem)] shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-black/20 shadow-[0_22px_45px_rgba(0,0,0,0.24)]"
+                    key={memory.id}
+                    ref={(node) => {
+                      cardRefs.current[index] = node;
+                    }}
+                    className="relative h-[clamp(8rem,30dvh,18rem)] w-[clamp(8rem,24vw,11rem)] shrink-0 snap-center overflow-hidden rounded-2xl border border-white/15 bg-black/20 shadow-[0_22px_45px_rgba(0,0,0,0.24)] transition-[transform,filter,opacity] duration-200 ease-out"
+                    style={{
+                      transform: `scale(${cardScales[index] ?? 0.94})`,
+                      filter: `saturate(${0.82 + ((cardScales[index] ?? 0.94) - 0.92) * 1.6})`,
+                      opacity: 0.72 + ((cardScales[index] ?? 0.94) - 0.92) * 1.1,
+                    }}
                   >
                     <Image
                       src={memory.url}
@@ -46,11 +97,10 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
                       className="object-cover"
                     />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-3 pb-3 pt-8 text-left">
-                      <span className="text-xs text-white">Memory {(index % memories.length) + 1}</span>
+                      <span className="text-xs text-white">Memory {index + 1}</span>
                     </div>
                   </div>
                 ))}
-              </div>
             </div>
           ) : (
             <div className="flex min-h-[clamp(9rem,32dvh,16rem)] flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/10 px-6 text-center">

@@ -23,6 +23,13 @@ const BURST_PARTICLES = Array.from({ length: 18 }, (_, index) => ({
 export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRevealProps) {
   const allPopped = popped.every(Boolean);
   const [bursts, setBursts] = useState<Record<number, number>>({});
+  const rowClassNames = [
+    "col-start-1 col-end-2 sm:col-start-1 sm:col-end-2",
+    "col-start-2 col-end-3 sm:col-start-2 sm:col-end-3",
+    "col-start-1 col-end-2 sm:col-start-1 sm:col-end-2",
+    "col-start-2 col-end-3 sm:col-start-2 sm:col-end-3",
+    "col-start-1 col-end-3 mx-auto w-1/2 sm:col-start-1 sm:col-end-3",
+  ];
 
   function popWithBurst(index: number) {
     setBursts((current) => ({ ...current, [index]: (current[index] ?? 0) + 1 }));
@@ -38,12 +45,12 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
           Tap each balloon in order. One pop, one reason, one more reminder of how loved they are.
         </p>
 
-        <div className="mt-3 grid grid-cols-5 gap-1.5 sm:mt-5 sm:gap-4">
+        <div className="mx-auto mt-3 grid max-w-2xl grid-cols-2 gap-x-4 gap-y-2 sm:mt-5 sm:gap-x-8 sm:gap-y-3">
           {reasons.map((reason, index) => {
             const isAvailable = !popped[index];
             return (
-              <div key={`${reason}-${index}`} className="flex min-h-0 flex-col items-center justify-start text-center">
-                <div className="relative flex h-[clamp(7.4rem,30dvh,14.5rem)] w-full items-start justify-center">
+              <div key={`${reason}-${index}`} className={`flex min-h-0 flex-col items-center justify-start text-center ${rowClassNames[index] ?? ""}`}>
+                <div className="relative flex h-[clamp(4.9rem,14dvh,7.6rem)] w-full items-start justify-center">
                   <AnimatePresence>
                     {bursts[index] ? (
                       <motion.div key={`burst-${index}-${bursts[index]}`} className="pointer-events-none absolute left-1/2 top-[36%] z-20 h-1 w-1">
@@ -83,7 +90,7 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
                         duration: 0.55,
                         y: { duration: 3.2 + index * 0.35, repeat: Infinity, ease: "easeInOut", delay: index * 0.15 },
                       }}
-                      className={`balloon relative flex h-[clamp(7rem,28dvh,14rem)] w-14 items-start justify-center border-0 p-0 text-white outline-none transition hover:scale-105 sm:w-32 ${isAvailable ? "" : "opacity-60"}`}
+                      className={`balloon relative flex h-[clamp(4.7rem,13dvh,7.2rem)] w-14 items-start justify-center border-0 p-0 text-white outline-none transition hover:scale-105 sm:w-24 ${isAvailable ? "" : "opacity-60"}`}
                     >
                       <span className="balloon-art" aria-hidden="true">
                         <span className="balloon-body">
@@ -97,12 +104,12 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
                     </motion.button>
                     ) : (
                       <motion.div
-                        key="popped"
-                        initial={{ scale: 0.7, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="mt-7 flex h-16 w-16 items-center justify-center rounded-full border border-pink-200/25 bg-pink-300/10 text-xs font-semibold text-pink-100 shadow-[0_0_30px_rgba(244,114,154,0.22)]"
+                        key="message"
+                        initial={{ scale: 0.72, opacity: 0, rotate: -5 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        className="flex h-[clamp(4.8rem,14dvh,7.5rem)] w-full max-w-[15rem] items-center justify-center rounded-2xl border border-pink-200/30 bg-pink-300/12 p-3 text-center text-[11px] leading-4 text-pink-50 shadow-[0_0_34px_rgba(244,114,154,0.22)] sm:rounded-[1.5rem] sm:p-4 sm:text-xs sm:leading-5"
                       >
-                        Pop!
+                        {reason}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -111,29 +118,6 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
               </div>
             );
           })}
-        </div>
-
-        <div className="mt-3 overflow-hidden rounded-2xl border border-pink-200/15 bg-white/5 py-2">
-          <motion.div
-            className="flex w-max gap-3 px-3"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 18, ease: "linear", repeat: Infinity }}
-          >
-            {[...reasons, ...reasons].map((reason, index) => {
-              const reasonIndex = index % reasons.length;
-              const isVisible = popped[reasonIndex];
-              return (
-                <div
-                  key={`${reasonIndex}-${index}`}
-                  className={`flex h-16 w-48 shrink-0 items-center justify-center rounded-2xl border px-3 text-center text-[11px] leading-4 transition sm:h-20 sm:w-60 sm:text-xs sm:leading-5 ${
-                    isVisible ? "border-pink-200/30 bg-pink-300/12 text-pink-50" : "border-white/10 bg-white/5 text-white/35"
-                  }`}
-                >
-                  {isVisible ? reason : "Pop the balloon to reveal"}
-                </div>
-              );
-            })}
-          </motion.div>
         </div>
 
         <div className="mt-3 flex flex-col items-center gap-2 sm:mt-4 sm:gap-3">

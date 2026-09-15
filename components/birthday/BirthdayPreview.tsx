@@ -225,11 +225,9 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
     });
   }
 
-  const isFinalScene = scene === "final";
-
   return (
-    <main className={`h-dvh overflow-hidden px-2 py-2 sm:px-5 sm:py-3 ${isFinalScene ? "bg-white text-slate-950" : ""}`}>
-      {isFinalScene ? null : <AmbientMotion />}
+    <main className="h-dvh overflow-hidden px-2 py-2 sm:px-5 sm:py-3">
+      <AmbientMotion />
       <div className="mx-auto flex h-full max-w-6xl flex-col">
         {!isShared ? <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
           <div>
@@ -284,8 +282,8 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
             const completed = SCENE_LABELS.findIndex((entry) => entry.id === scene) > index;
             return (
               <div key={item.id} className="space-y-1">
-                <div className={`h-1 rounded-full ${active || completed ? "bg-gradient-to-r from-pink-400 to-fuchsia-500" : isFinalScene ? "bg-slate-200" : "bg-white/10"}`} />
-                <p className={`hidden text-[10px] sm:block ${active ? isFinalScene ? "font-semibold text-slate-950" : "font-semibold text-white" : "text-[#9f8ca0]"}`}>{item.label}</p>
+                <div className={`h-1 rounded-full ${active || completed ? "bg-gradient-to-r from-pink-400 to-fuchsia-500" : "bg-white/10"}`} />
+                <p className={`hidden text-[10px] sm:block ${active ? "font-semibold text-white" : "text-[#9f8ca0]"}`}>{item.label}</p>
               </div>
             );
           })}
