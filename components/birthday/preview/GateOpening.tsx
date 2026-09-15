@@ -59,10 +59,12 @@ export function GateOpening({ name, onContinue }: GateOpeningProps) {
             priority
             className="mx-auto max-h-[clamp(11rem,45dvh,28rem)] w-auto max-w-full drop-shadow-[0_28px_55px_rgba(0,0,0,0.42)]"
           />
-          <div className="absolute left-1/2 top-[52%] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/35 px-4 py-2 text-xs font-semibold text-amber-50 shadow-2xl backdrop-blur-md">
-            <Hand className="h-4 w-4" />
-            {isOpening ? "Gate open" : `${knocks}/${KNOCKS_TO_OPEN} knocks`}
-          </div>
+          {!isOpening ? (
+            <div className="absolute left-1/2 top-[52%] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/35 px-4 py-2 text-xs font-semibold text-amber-50 shadow-2xl backdrop-blur-md">
+              <Hand className="h-4 w-4" />
+              {knocks}/{KNOCKS_TO_OPEN} knocks
+            </div>
+          ) : null}
         </motion.button>
 
         {isOpening ? (

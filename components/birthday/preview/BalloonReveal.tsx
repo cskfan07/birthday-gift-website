@@ -114,7 +114,9 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
                     )}
                   </AnimatePresence>
                 </div>
-                <span className="mt-1 text-[10px] text-[#c9b8c7] sm:mt-2 sm:text-xs">{popped[index] ? "Revealed" : "Tap to pop"}</span>
+                {!popped[index] ? (
+                  <span className="mt-1 text-[10px] text-[#c9b8c7] sm:mt-2 sm:text-xs">Tap to pop</span>
+                ) : null}
               </div>
             );
           })}
