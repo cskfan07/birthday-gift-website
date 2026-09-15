@@ -10,6 +10,8 @@ interface MemoryRevealProps {
 }
 
 export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
+  const carouselMemories = memories.length > 0 ? [...memories, ...memories] : [];
+
   return (
     <section className="soft-panel flex h-full min-h-0 items-center overflow-hidden rounded-[1.5rem] p-3 sm:rounded-[2rem] sm:p-5">
       <div className="mx-auto w-full max-w-5xl text-center">
@@ -28,24 +30,27 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
           </div>
 
           {memories.length > 0 ? (
-            <div className="grid grid-cols-5 gap-2 sm:gap-3">
-              {memories.map((memory, index) => (
-                <div key={memory.id} className="relative overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="relative h-[clamp(7rem,28dvh,18rem)]">
+            <div className="memory-carousel overflow-hidden py-2">
+              <div className="memory-carousel-track flex w-max gap-3 sm:gap-4">
+                {carouselMemories.map((memory, index) => (
+                  <div
+                    key={`${memory.id}-${index}`}
+                    className="memory-carousel-card relative h-[clamp(8rem,30dvh,18rem)] w-[clamp(7rem,18vw,11rem)] shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-black/20 shadow-[0_22px_45px_rgba(0,0,0,0.24)]"
+                  >
                     <Image
                       src={memory.url}
                       alt={memory.fileName}
                       fill
                       unoptimized
-                      sizes="(max-width: 640px) 100vw, 20vw"
+                      sizes="(max-width: 640px) 35vw, 180px"
                       className="object-cover"
                     />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-3 pb-3 pt-8 text-left">
+                      <span className="text-xs text-white">Memory {(index % memories.length) + 1}</span>
+                    </div>
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-3 pb-3 pt-8 text-left">
-                    <span className="text-xs text-white">Memory {index + 1}</span>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : (
             <div className="flex min-h-[clamp(9rem,32dvh,16rem)] flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/10 px-6 text-center">
