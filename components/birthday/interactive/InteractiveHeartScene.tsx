@@ -5,10 +5,11 @@ import { ArrowRight, Hand } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface InteractiveHeartSceneProps {
+  name: string;
   onComplete: () => void;
 }
 
-export function InteractiveHeartScene({ onComplete }: InteractiveHeartSceneProps) {
+export function InteractiveHeartScene({ name, onComplete }: InteractiveHeartSceneProps) {
   const [knocks, setKnocks] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -48,6 +49,18 @@ export function InteractiveHeartScene({ onComplete }: InteractiveHeartSceneProps
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:2.8rem_2.8rem]" />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-pink-950/70 to-transparent" />
             </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isOpen ? 1 : 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center"
+            >
+              <p className="font-serif text-3xl text-white drop-shadow-[0_2px_10px_rgba(244,114,154,0.8)] sm:text-4xl">Welcome, {name}</p>
+              <button type="button" onClick={(event) => { event.stopPropagation(); onComplete(); }} className="mt-4 inline-flex items-center gap-2 rounded-full border border-pink-200/30 bg-pink-200/10 px-4 py-2 text-sm font-semibold text-pink-50 transition hover:bg-pink-200/20">
+                Continue
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </motion.div>
             <motion.div animate={{ x: isOpen ? "-96%" : 0 }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-y-0 left-0 w-1/2 origin-left border-r border-amber-100/20 bg-gradient-to-br from-rose-950 via-[#502642] to-[#241526] shadow-[inset_-12px_0_25px_rgba(0,0,0,0.3)]" />
             <motion.div animate={{ x: isOpen ? "96%" : 0 }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-y-0 right-0 w-1/2 origin-right border-l border-amber-100/20 bg-gradient-to-bl from-rose-950 via-[#502642] to-[#241526] shadow-[inset_12px_0_25px_rgba(0,0,0,0.3)]" />
             <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-amber-100/80 transition-opacity duration-500" style={{ opacity: isOpen ? 0 : 1 }}>
@@ -62,17 +75,9 @@ export function InteractiveHeartScene({ onComplete }: InteractiveHeartSceneProps
           </div>
         </div>
 
-        {isOpen ? (
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.6 }} className="mt-5">
-            <p className="font-serif text-4xl text-white sm:text-5xl">Welcome</p>
-            <button type="button" onClick={(event) => { event.stopPropagation(); onComplete(); }} className="mt-4 inline-flex items-center gap-2 rounded-full border border-pink-200/30 bg-pink-200/10 px-5 py-2.5 text-sm font-semibold text-pink-50 transition hover:bg-pink-200/20">
-              Continue
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </motion.div>
-        ) : (
+        {!isOpen ? (
           <p className="mt-5 text-xs uppercase tracking-[0.28em] text-pink-100/60">Knocks: {knocks} / 3</p>
-        )}
+        ) : null}
       </div>
     </section>
   );

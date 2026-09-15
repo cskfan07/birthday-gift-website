@@ -182,7 +182,7 @@ export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
       <div className="pointer-events-none absolute right-[16%] top-[25%] text-sm text-pink-100/60">{String.fromCodePoint(0x2726)}</div>
       <div className="relative flex min-h-[580px] flex-col items-center justify-center">
         <AnimatePresence mode="wait">
-          {phase === "interactive" ? <InteractiveHeartScene key="interactive-heart" onComplete={handleImpact} /> : null}
+          {phase === "interactive" ? <InteractiveHeartScene key="interactive-heart" name={name} onComplete={handleImpact} /> : null}
         </AnimatePresence>
 
         <AnimatePresence>
