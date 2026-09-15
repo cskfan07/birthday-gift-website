@@ -26,13 +26,22 @@ body {
     radial-gradient(circle at 90% 10%, rgba(127, 63, 117, 0.24), transparent 30rem),
     linear-gradient(145deg, #0e0a13 0%, #1d1021 46%, #0b0810 100%);
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
 }
 
 button,
 input,
 textarea {
   font: inherit;
+}
+
+.font-serif {
+  font-family: var(--font-pacifico), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.birthday-script {
+  font-family: var(--font-dancing-script), cursive;
 }
 
 button {
@@ -169,6 +178,18 @@ button:disabled {
   50% {
     transform: translateX(12%) rotate(7deg);
     opacity: 0.28;
+  }
+}
+
+@keyframes preloader-heart-float {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate3d(0, 8px, 0) scale(0.86);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translate3d(0, -16px, 0) scale(1.08);
   }
 }
 
@@ -323,6 +344,11 @@ button:disabled {
   background: linear-gradient(100deg, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.08) 75%);
   background-size: 220% 100%;
   animation: shimmer 1.5s linear infinite;
+}
+
+.preloader-heart {
+  animation: preloader-heart-float 5.5s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

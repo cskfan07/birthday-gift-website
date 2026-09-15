@@ -5,6 +5,7 @@ import { Check, Copy, Music2, Pause, Play, RotateCcw, Share2 } from "lucide-reac
 import { AnimatePresence, motion } from "framer-motion";
 
 import { BalloonReveal } from "@/components/birthday/preview/BalloonReveal";
+import { BirthdayPreloader } from "@/components/birthday/preview/BirthdayPreloader";
 import { FinalBirthday } from "@/components/birthday/preview/FinalBirthday";
 import { GateOpening } from "@/components/birthday/preview/GateOpening";
 import { HeartOpening } from "@/components/birthday/preview/HeartOpening";
@@ -127,6 +128,7 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
   const [isCopied, setIsCopied] = useState(false);
   const [shareError, setShareError] = useState("");
   const [shareNotice, setShareNotice] = useState("");
+  const [isPreloaderDone, setIsPreloaderDone] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -223,6 +225,14 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
       next[index] = true;
       return next;
     });
+  }
+
+  if (!isPreloaderDone) {
+    return (
+      <AnimatePresence mode="wait">
+        <BirthdayPreloader data={data} onComplete={() => setIsPreloaderDone(true)} />
+      </AnimatePresence>
+    );
   }
 
   return (

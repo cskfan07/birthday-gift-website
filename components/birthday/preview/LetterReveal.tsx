@@ -36,8 +36,8 @@ export function LetterReveal({ letter, yourName, onContinue }: LetterRevealProps
                 <MailOpen className="h-4 w-4" />
                 Opened with love
               </div>
-              <p className="mt-3 whitespace-pre-wrap text-xs leading-6 text-slate-700 sm:text-sm">{letter}</p>
-              <p className="mt-3 text-sm font-semibold text-rose-700">With love, {yourName}</p>
+              <p className="birthday-script mt-3 whitespace-pre-wrap text-lg leading-7 text-slate-700 sm:text-xl">{letter}</p>
+              <p className="birthday-script mt-3 text-xl font-semibold text-rose-700">With love, {yourName}</p>
             </motion.div>
           ) : null}
 

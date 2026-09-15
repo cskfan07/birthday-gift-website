@@ -69,8 +69,14 @@ function TreeGrowth() {
       drawingCanvas.style.height = `${height}px`;
       drawingContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       const isPhone = width < 600;
-      canopyCenter = { x: width * (isPhone ? 0.52 : 0.58), y: height * (isPhone ? 0.3 : 0.32) };
-      canopyScale = Math.min(width * (isPhone ? 0.038 : 0.034), height * 0.044);
+      const heartPadding = isPhone ? 18 : 22;
+      const maxCanopyWidth = width * (isPhone ? 0.82 : 0.72);
+      const maxCanopyHeight = height * (isPhone ? 0.58 : 0.62);
+      canopyScale = Math.min(maxCanopyWidth / 38, maxCanopyHeight / 31);
+      canopyCenter = {
+        x: width * (isPhone ? 0.5 : 0.54),
+        y: heartPadding + canopyScale * 12.2 + Math.max(8, width * 0.01),
+      };
     }
 
     function heartPoint(angle: number, scale: number) {
@@ -96,8 +102,9 @@ function TreeGrowth() {
     }
 
     function drawTree(progress: number) {
-      const rootX = width * (width < 600 ? 0.52 : 0.58);
-      const rootY = height * 1.03;
+      const isPhone = width < 600;
+      const rootX = width * (isPhone ? 0.5 : 0.54);
+      const rootY = height - Math.max(18, height * 0.055);
       const trunkTopY = height - (height - canopyCenter.y) * 0.78 * progress;
       const sway = Math.sin(frame * 0.018) * 2.5;
 
@@ -166,7 +173,7 @@ function TreeGrowth() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="mt-1 h-[clamp(9rem,31dvh,18rem)] w-full sm:mt-2 sm:h-[clamp(11rem,36dvh,21rem)]" aria-label="Animated heart tree" />;
+  return <canvas ref={canvasRef} className="mt-1 block h-[clamp(14rem,40dvh,21rem)] w-full sm:mt-2 sm:h-[clamp(16rem,44dvh,26rem)]" aria-label="Animated heart tree" />;
 }
 
 export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
@@ -179,7 +186,7 @@ export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="mt-0"
+          className="mt-0 w-full"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-pink-100/70 sm:tracking-[0.35em]">It&apos;s officially your day</p>
           <h1 className="mt-1 font-serif text-4xl leading-none text-white sm:mt-2 sm:text-6xl">Happy Birthday</h1>
