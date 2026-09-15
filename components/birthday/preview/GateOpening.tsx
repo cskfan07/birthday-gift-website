@@ -52,7 +52,7 @@ export function GateOpening({ name, onContinue }: GateOpeningProps) {
           className="relative mt-2 w-full max-w-[58rem] border-0 bg-transparent p-0 text-white outline-none transition hover:scale-[1.01] focus-visible:ring-4 focus-visible:ring-pink-200/45 disabled:hover:scale-100 sm:mt-3"
         >
           <Image
-            src={isOpening ? "/birthday-gate-open.png" : "/birthday-gate-closed.png"}
+            src={isOpening ? "/birthday-gate-open.webp" : "/birthday-gate-closed.webp"}
             alt={isOpening ? "Open birthday gate" : "Closed birthday gate"}
             width={1374}
             height={1145}

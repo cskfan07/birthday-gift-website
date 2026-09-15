@@ -111,9 +111,9 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
 
   const tasks = useMemo<AssetTask[]>(() => {
     const imageSources = [
-      "/birthday-preloader.png",
-      "/birthday-gate-closed.png",
-      "/birthday-gate-open.png",
+      "/birthday-preloader.webp",
+      "/birthday-gate-closed.webp",
+      "/birthday-gate-open.webp",
     ];
 
     return [
@@ -201,7 +201,7 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
 
       <div className="relative w-full max-w-[min(88vw,29rem)]">
         <NextImage
-          src="/birthday-preloader.png"
+          src="/birthday-preloader.webp"
           alt="Cute teddy birthday decoration saying preparing a little surprise"
           width={1374}
           height={1145}
