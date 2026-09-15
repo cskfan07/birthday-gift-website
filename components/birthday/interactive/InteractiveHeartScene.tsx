@@ -21,10 +21,6 @@ export function InteractiveHeartScene({ onComplete }: InteractiveHeartSceneProps
     });
   }
 
-  useEffect(() => {
-    setReducedMotion(prefersReducedMotion);
-  }, [prefersReducedMotion]);
-
   return (
     <section
       className="soft-panel relative min-h-[640px] overflow-hidden rounded-[2rem] p-5 text-center sm:p-10"
