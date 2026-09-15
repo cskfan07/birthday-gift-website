@@ -137,24 +137,7 @@ export function BirthdayWizard() {
     setIsLoadingPreview(false);
   }
 
-  async function createPreview() {
-    setIsLoadingPreview(true);
-    await Promise.all([
-      ...data.memories.map((memory) => new Promise<void>((resolve) => {
-        const image = new Image();
-        image.onload = () => resolve();
-        image.onerror = () => resolve();
-        image.src = memory.url;
-      })),
-      ...(data.music ? [new Promise<void>((resolve) => {
-        const audio = document.createElement("audio");
-        audio.oncanplaythrough = () => resolve();
-        audio.onerror = () => resolve();
-        audio.src = data.music?.url ?? "";
-        audio.load();
-      })] : []),
-    ]);
-    setIsLoadingPreview(false);
+  function createPreview() {
     setShowPreview(true);
   }
 

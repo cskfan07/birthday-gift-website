@@ -96,16 +96,8 @@ function preloadAudio(src: string) {
   return promise;
 }
 
-function waitForFonts() {
-  if (!("fonts" in document)) {
-    return Promise.resolve();
-  }
-  return document.fonts.ready.then(() => undefined);
-}
-
 export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) {
   const [loadedAssets, setLoadedAssets] = useState(0);
-  const [displayProgress, setDisplayProgress] = useState(1);
   const [isReady, setIsReady] = useState(false);
   const hasCompletedRef = useRef(false);
 
@@ -121,18 +113,8 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
         id: src,
         load: () => preloadImage(src),
       })),
-      {
-        id: "fonts",
-        load: waitForFonts,
-      },
-      ...(data.music
-        ? [{
-          id: data.music.url,
-          load: () => preloadAudio(data.music?.url ?? ""),
-        }]
-        : []),
     ];
-  }, [data.music]);
+  }, []);
 
   const targetProgress = Math.min(100, Math.round((loadedAssets / Math.max(tasks.length, 1)) * 100));
 
@@ -153,26 +135,23 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
   }, [tasks]);
 
   useEffect(() => {
-    if (displayProgress >= targetProgress) {
+    if (targetProgress < 100 || !data.music?.url) {
       return;
     }
 
-    const delay = targetProgress === 100 ? 12 : 22;
-    const timer = window.setTimeout(() => {
-      setDisplayProgress((current) => Math.min(targetProgress, current + 1));
-    }, delay);
-
-    return () => window.clearTimeout(timer);
-  }, [displayProgress, targetProgress]);
+    void preloadAudio(data.music.url).catch((error) => {
+      console.error("Birthday audio preload could not start.", error);
+    });
+  }, [data.music, targetProgress]);
 
   useEffect(() => {
-    if (targetProgress === 100 && displayProgress === 100 && !hasCompletedRef.current) {
+    if (targetProgress === 100 && !hasCompletedRef.current) {
       hasCompletedRef.current = true;
       setIsReady(true);
       const timer = window.setTimeout(onComplete, 850);
       return () => window.clearTimeout(timer);
     }
-  }, [displayProgress, onComplete, targetProgress]);
+  }, [onComplete, targetProgress]);
 
   return (
     <motion.div
@@ -215,7 +194,7 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
           <div className="h-3 overflow-hidden rounded-full bg-black/25">
             <div
               className="h-full rounded-full bg-gradient-to-r from-pink-300 via-rose-300 to-amber-200 transition-[width] duration-200 ease-out"
-              style={{ width: `${displayProgress}%` }}
+              style={{ width: `${targetProgress}%` }}
             />
           </div>
         </div>
@@ -224,7 +203,7 @@ export function BirthdayPreloader({ data, onComplete }: BirthdayPreloaderProps) 
           Preparing a little surprise... {String.fromCodePoint(0x2764, 0xfe0f)}
         </p>
         <p className="mt-2 text-sm font-semibold text-pink-50/90">
-          {isReady ? `${String.fromCodePoint(0x2728)} Surprise is ready! ${String.fromCodePoint(0x2728)}` : `Loading... ${displayProgress}%`}
+          {isReady ? `${String.fromCodePoint(0x2728)} Surprise is ready! ${String.fromCodePoint(0x2728)}` : `Loading... ${targetProgress}%`}
         </p>
       </div>
     </motion.div>
