@@ -11,15 +11,15 @@ interface MemoryRevealProps {
 
 export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
   return (
-    <section className="soft-panel min-h-[640px] rounded-[2rem] p-5 sm:p-10">
-      <div className="mx-auto max-w-4xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/65">The memory string</p>
-        <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">Moments worth keeping.</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#c9b8c7]">
+    <section className="soft-panel flex h-full min-h-0 items-center overflow-hidden rounded-[1.5rem] p-3 sm:rounded-[2rem] sm:p-5">
+      <div className="mx-auto w-full max-w-5xl text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-pink-100/65 sm:tracking-[0.35em]">The memory string</p>
+        <h1 className="mt-1 font-serif text-3xl text-white sm:mt-2 sm:text-5xl">Moments worth keeping.</h1>
+        <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-[#c9b8c7] sm:text-sm sm:leading-6">
           Every photo is a little window into the people, places, and days that made this year special.
         </p>
 
-        <div className="relative mt-12 rounded-[1.8rem] border border-pink-100/10 bg-gradient-to-b from-pink-200/8 to-transparent px-4 pb-8 pt-12 sm:px-8">
+        <div className="relative mt-3 rounded-[1.5rem] border border-pink-100/10 bg-gradient-to-b from-pink-200/8 to-transparent px-3 pb-3 pt-7 sm:mt-5 sm:rounded-[1.8rem] sm:px-5 sm:pb-5 sm:pt-9">
           <div className="absolute left-8 right-8 top-7 h-px bg-amber-100/25 sm:left-14 sm:right-14" />
           <div className="absolute left-7 right-7 top-5 flex justify-between sm:left-12 sm:right-12">
             {Array.from({ length: Math.max(5, memories.length) }).map((_, index) => (
@@ -28,10 +28,10 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
           </div>
 
           {memories.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-5 gap-2 sm:gap-3">
               {memories.map((memory, index) => (
                 <div key={memory.id} className="relative overflow-hidden rounded-2xl border border-white/15 bg-black/20">
-                  <div className="relative aspect-[4/5]">
+                  <div className="relative h-[clamp(7rem,28dvh,18rem)]">
                     <Image
                       src={memory.url}
                       alt={memory.fileName}
@@ -48,7 +48,7 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
               ))}
             </div>
           ) : (
-            <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/10 px-6 text-center">
+            <div className="flex min-h-[clamp(9rem,32dvh,16rem)] flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/10 px-6 text-center">
               <ImageIcon className="h-10 w-10 text-pink-200/65" />
               <p className="mt-4 text-sm font-semibold text-white">A little space saved for memories.</p>
               <p className="mt-1 text-xs text-[#c9b8c7]">This surprise can still be beautiful without photos.</p>
@@ -56,12 +56,12 @@ export function MemoryReveal({ memories, onContinue }: MemoryRevealProps) {
           )}
         </div>
 
-        <div className="mt-8 flex flex-col items-center gap-4">
+        <div className="mt-3 flex flex-col items-center gap-2 sm:mt-4 sm:gap-3">
           <div className="inline-flex items-center gap-2 text-xs text-[#c9b8c7]">
             <Sparkles className="h-3.5 w-3.5 text-pink-200" />
             Tap to continue
           </div>
-          <Button type="button" onClick={onContinue}>
+          <Button type="button" onClick={onContinue} className="min-h-10 px-4 text-xs sm:min-h-11 sm:text-sm">
             Continue to the letter
           </Button>
         </div>

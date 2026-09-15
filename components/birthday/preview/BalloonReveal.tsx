@@ -16,26 +16,26 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
   const allPopped = popped.every(Boolean);
 
   return (
-    <section className="soft-panel min-h-[640px] rounded-[2rem] p-5 sm:p-10">
-      <div className="mx-auto max-w-3xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/65">The balloon reveal</p>
-        <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">Five little reasons.</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#c9b8c7]">
+    <section className="soft-panel flex h-full min-h-0 items-center overflow-hidden rounded-[1.5rem] p-3 sm:rounded-[2rem] sm:p-5">
+      <div className="mx-auto w-full max-w-4xl text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-pink-100/65 sm:tracking-[0.35em]">The balloon reveal</p>
+        <h1 className="mt-1 font-serif text-3xl text-white sm:mt-2 sm:text-5xl">Five little reasons.</h1>
+        <p className="mx-auto mt-1 max-w-xl text-xs leading-5 text-[#c9b8c7] sm:text-sm sm:leading-6">
           Tap each balloon in order. One pop, one reason, one more reminder of how loved they are.
         </p>
 
-        <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-5">
+        <div className="mt-3 grid grid-cols-5 gap-1.5 sm:mt-5 sm:gap-4">
           {reasons.map((reason, index) => {
             const isAvailable = !popped[index];
             return (
-              <div key={`${reason}-${index}`} className="flex min-h-[18rem] flex-col items-center justify-start text-center">
+              <div key={`${reason}-${index}`} className="flex min-h-0 flex-col items-center justify-start text-center">
                 <AnimatePresence mode="wait">
                   {popped[index] ? (
                     <motion.div
                       key="message"
                       initial={{ scale: 0.5, opacity: 0, rotate: -8 }}
                       animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                      className="flex h-28 w-full max-w-[150px] items-center justify-center rounded-[1.5rem] border border-pink-200/30 bg-pink-300/12 p-3 text-xs leading-5 text-pink-50 shadow-[0_0_34px_rgba(244,114,154,0.18)]"
+                      className="flex h-[clamp(4.5rem,16dvh,7rem)] w-full max-w-[150px] items-center justify-center rounded-2xl border border-pink-200/30 bg-pink-300/12 p-2 text-[10px] leading-4 text-pink-50 shadow-[0_0_34px_rgba(244,114,154,0.18)] sm:rounded-[1.5rem] sm:p-3 sm:text-xs sm:leading-5"
                     >
                       {reason}
                     </motion.div>
@@ -51,7 +51,7 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
                         duration: 0.55,
                         y: { duration: 3.2 + index * 0.35, repeat: Infinity, ease: "easeInOut", delay: index * 0.15 },
                       }}
-                      className={`balloon relative flex h-[15.5rem] w-32 items-start justify-center border-0 p-0 text-white outline-none transition hover:scale-105 ${isAvailable ? "" : "opacity-60"}`}
+                      className={`balloon relative flex h-[clamp(7rem,28dvh,14rem)] w-14 items-start justify-center border-0 p-0 text-white outline-none transition hover:scale-105 sm:w-32 ${isAvailable ? "" : "opacity-60"}`}
                     >
                       <span className="balloon-art" aria-hidden="true">
                         <span className="balloon-body">
@@ -65,18 +65,18 @@ export function BalloonReveal({ reasons, popped, onPop, onContinue }: BalloonRev
                     </motion.button>
                   )}
                 </AnimatePresence>
-                <span className="mt-2 text-xs text-[#c9b8c7]">{popped[index] ? "Revealed" : "Tap to pop"}</span>
+                <span className="mt-1 text-[10px] text-[#c9b8c7] sm:mt-2 sm:text-xs">{popped[index] ? "Revealed" : "Tap to pop"}</span>
               </div>
             );
           })}
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-4">
+        <div className="mt-3 flex flex-col items-center gap-2 sm:mt-4 sm:gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-pink-100">
             <Sparkles className="h-3.5 w-3.5" />
             {popped.filter(Boolean).length} of 5 balloons popped
           </div>
-          <Button type="button" onClick={onContinue} disabled={!allPopped}>
+          <Button type="button" onClick={onContinue} disabled={!allPopped} className="min-h-10 px-4 text-xs sm:min-h-11 sm:text-sm">
             See the memories
           </Button>
         </div>

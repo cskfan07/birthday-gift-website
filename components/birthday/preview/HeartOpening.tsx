@@ -166,29 +166,29 @@ function TreeGrowth() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="mt-4 h-[20rem] w-full sm:h-[30rem]" aria-label="Animated heart tree" />;
+  return <canvas ref={canvasRef} className="mt-1 h-[clamp(9rem,31dvh,18rem)] w-full sm:mt-2 sm:h-[clamp(11rem,36dvh,21rem)]" aria-label="Animated heart tree" />;
 }
 
 export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
   return (
-    <section className="soft-panel relative min-h-[640px] overflow-hidden rounded-[2rem] p-6 text-center sm:p-10">
+    <section className="soft-panel relative h-full min-h-0 overflow-hidden rounded-[1.5rem] p-3 text-center sm:rounded-[2rem] sm:p-5">
       <div className="pointer-events-none absolute left-[12%] top-[14%] text-xl text-pink-200/70">{String.fromCodePoint(0x2728)}</div>
       <div className="pointer-events-none absolute right-[16%] top-[25%] text-sm text-pink-100/60">{String.fromCodePoint(0x2726)}</div>
-      <div className="relative flex min-h-[580px] flex-col items-center justify-center">
+      <div className="relative flex h-full min-h-0 flex-col items-center justify-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="mt-2"
+          className="mt-0"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/70">It&apos;s officially your day</p>
-          <h1 className="mt-4 font-serif text-5xl leading-none text-white sm:text-7xl">Happy Birthday</h1>
-          <h2 className="mt-3 text-2xl font-semibold text-pink-100 sm:text-3xl">{name}</h2>
-          <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-[#d9c9d8]">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-pink-100/70 sm:tracking-[0.35em]">It&apos;s officially your day</p>
+          <h1 className="mt-1 font-serif text-4xl leading-none text-white sm:mt-2 sm:text-6xl">Happy Birthday</h1>
+          <h2 className="mt-2 text-xl font-semibold text-pink-100 sm:text-3xl">{name}</h2>
+          <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[#d9c9d8] sm:text-sm sm:leading-6">
             And just like that, you&apos;re turning <span className="font-semibold text-white">{age}</span>.
           </p>
           <TreeGrowth />
-          <Button type="button" onClick={onContinue} className="mt-2">
+          <Button type="button" onClick={onContinue} className="mt-1 min-h-10 px-4 text-xs sm:min-h-11 sm:text-sm">
             Enter the story
             <Sparkles className="h-4 w-4" />
           </Button>

@@ -225,33 +225,35 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
     });
   }
 
+  const isFinalScene = scene === "final";
+
   return (
-    <main className="min-h-screen px-4 py-5 sm:px-8 sm:py-8">
-      <AmbientMotion />
-      <div className="mx-auto max-w-6xl">
-        {!isShared ? <header className="mb-6 flex items-center justify-between gap-4">
+    <main className={`h-dvh overflow-hidden px-2 py-2 sm:px-5 sm:py-3 ${isFinalScene ? "bg-white text-slate-950" : ""}`}>
+      {isFinalScene ? null : <AmbientMotion />}
+      <div className="mx-auto flex h-full max-w-6xl flex-col">
+        {!isShared ? <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-pink-100/65">Private preview</p>
-            <p className="mt-2 text-sm text-[#c9b8c7]">A birthday story made for {data.theirName}.</p>
+            <p className="mt-0.5 hidden text-xs text-[#c9b8c7] sm:block">A birthday story made for {data.theirName}.</p>
           </div>
-          <Button type="button" variant="ghost" onClick={onRestart}>
+          <Button type="button" variant="ghost" onClick={onRestart} className="min-h-8 px-3 text-xs sm:min-h-10 sm:px-4">
             <RotateCcw className="h-4 w-4" />
             Start again
           </Button>
         </header> : null}
 
-        {!isShared ? <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        {!isShared ? <div className="mb-1.5 flex shrink-0 flex-col gap-1.5 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-3 py-1.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs text-pink-50">
             {shareError ? <span className="text-rose-200">{shareError}</span> : shareNotice ? <span className="text-amber-200">{shareNotice}</span> : isCopied ? <><Check className="h-4 w-4 text-emerald-200" /> Link copied: {shareUrl}</> : shareUrl ? "Share link ready. Tap Copy share link." : "Share this birthday preview with one link."}
           </div>
-          <Button type="button" variant="secondary" onClick={shareUrl ? copyShareLink : createShareLink} disabled={isSharing || isCopied}>
+          <Button type="button" variant="secondary" onClick={shareUrl ? copyShareLink : createShareLink} disabled={isSharing || isCopied} className="min-h-8 px-3 text-xs sm:min-h-9 sm:px-4">
             {isCopied ? <Check className="h-4 w-4" /> : shareUrl ? <Copy className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
             {isSharing ? "Creating..." : isCopied ? "Copied" : shareUrl ? "Copy share link" : "Create share link"}
           </Button>
         </div> : null}
 
         {data.music ? (
-          <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-4 py-3">
+          <div className="mb-1.5 flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-pink-200/15 bg-pink-300/8 px-3 py-1.5">
             <div className="flex min-w-0 items-center gap-3">
               <Music2 className="h-4 w-4 shrink-0 text-pink-200" />
               <span className="truncate text-xs text-pink-50">{data.music.fileName}</span>
@@ -260,7 +262,7 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
               type="button"
               onClick={toggleMusic}
               aria-label={isMusicPlaying ? "Pause music" : "Play music"}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white/20"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white/20"
             >
               {isMusicPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
             </button>
@@ -276,26 +278,28 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
           </div>
         ) : null}
 
-        <div className="mb-6 grid grid-cols-6 gap-2 sm:gap-3">
+        <div className="mb-1.5 grid shrink-0 grid-cols-6 gap-2 sm:gap-3">
           {SCENE_LABELS.map((item, index) => {
             const active = item.id === scene;
             const completed = SCENE_LABELS.findIndex((entry) => entry.id === scene) > index;
             return (
-              <div key={item.id} className="space-y-2">
-                <div className={`h-1.5 rounded-full ${active || completed ? "bg-gradient-to-r from-pink-400 to-fuchsia-500" : "bg-white/10"}`} />
-                <p className={`text-[11px] sm:text-xs ${active ? "font-semibold text-white" : "text-[#9f8ca0]"}`}>{item.label}</p>
+              <div key={item.id} className="space-y-1">
+                <div className={`h-1 rounded-full ${active || completed ? "bg-gradient-to-r from-pink-400 to-fuchsia-500" : isFinalScene ? "bg-slate-200" : "bg-white/10"}`} />
+                <p className={`hidden text-[10px] sm:block ${active ? isFinalScene ? "font-semibold text-slate-950" : "font-semibold text-white" : "text-[#9f8ca0]"}`}>{item.label}</p>
               </div>
             );
           })}
         </div>
 
-        <AnimatePresence mode="wait">
+        <div className="min-h-0 flex-1">
+          <AnimatePresence mode="wait">
           <motion.div
             key={scene}
             initial={{ opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -18 }}
             transition={{ duration: 0.3 }}
+            className="h-full"
           >
             {scene === "gate" ? (
               <GateOpening
@@ -338,7 +342,8 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
               />
             ) : null}
           </motion.div>
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </div>
     </main>
   );

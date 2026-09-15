@@ -249,8 +249,8 @@ button:disabled {
 }
 
 .balloon-string {
-  width: 28px;
-  height: 100px;
+  width: clamp(12px, 3vw, 28px);
+  height: clamp(44px, 11vw, 100px);
   opacity: 0.8;
 }
 
@@ -269,8 +269,8 @@ button:disabled {
 
 .balloon-body {
   position: relative;
-  width: 120px;
-  height: 145px;
+  width: clamp(46px, 12vw, 120px);
+  height: clamp(56px, 14vw, 145px);
   border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
   background: radial-gradient(circle at 35% 35%, #ff4d4d, #cc0000 70%, #990000 100%);
   box-shadow: inset -5px -5px 12px rgba(0, 0, 0, 0.25), 0 15px 25px rgba(0, 0, 0, 0.1);
