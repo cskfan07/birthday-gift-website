@@ -1,13 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Sparkles } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/Button";
-import { InteractiveHeartScene } from "@/components/birthday/interactive/InteractiveHeartScene";
-
-type IntroPhase = "interactive" | "message";
 
 interface HeartOpeningProps {
   name: string;
@@ -173,44 +170,29 @@ function TreeGrowth() {
 }
 
 export function HeartOpening({ name, age, onContinue }: HeartOpeningProps) {
-  const [phase, setPhase] = useState<IntroPhase>("interactive");
-  const handleImpact = useCallback(() => setPhase("message"), []);
-
   return (
     <section className="soft-panel relative min-h-[640px] overflow-hidden rounded-[2rem] p-6 text-center sm:p-10">
       <div className="pointer-events-none absolute left-[12%] top-[14%] text-xl text-pink-200/70">{String.fromCodePoint(0x2728)}</div>
       <div className="pointer-events-none absolute right-[16%] top-[25%] text-sm text-pink-100/60">{String.fromCodePoint(0x2726)}</div>
       <div className="relative flex min-h-[580px] flex-col items-center justify-center">
-        <AnimatePresence mode="wait">
-          {phase === "interactive" ? <InteractiveHeartScene key="interactive-heart" name={name} onComplete={handleImpact} /> : null}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {phase === "message" ? (
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="mt-2"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/70">It&apos;s officially your day</p>
-              <h1 className="mt-4 font-serif text-5xl leading-none text-white sm:text-7xl">Happy Birthday</h1>
-              <h2 className="mt-3 text-2xl font-semibold text-pink-100 sm:text-3xl">{name}</h2>
-              <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-[#d9c9d8]">
-                And just like that, you&apos;re turning <span className="font-semibold text-white">{age}</span>.
-              </p>
-              <TreeGrowth />
-              <Button type="button" onClick={onContinue} className="mt-2">
-                Enter the story
-                <Sparkles className="h-4 w-4" />
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10 text-sm text-[#c9b8c7]">
-              Watch closely...
-            </motion.p>
-          )}
-        </AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="mt-2"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-pink-100/70">It&apos;s officially your day</p>
+          <h1 className="mt-4 font-serif text-5xl leading-none text-white sm:text-7xl">Happy Birthday</h1>
+          <h2 className="mt-3 text-2xl font-semibold text-pink-100 sm:text-3xl">{name}</h2>
+          <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-[#d9c9d8]">
+            And just like that, you&apos;re turning <span className="font-semibold text-white">{age}</span>.
+          </p>
+          <TreeGrowth />
+          <Button type="button" onClick={onContinue} className="mt-2">
+            Enter the story
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
