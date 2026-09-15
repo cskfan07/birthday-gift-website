@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { Hand, Sparkles } from "lucide-react";
+import { ArrowRight, Hand, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+
+import { Button } from "@/components/ui/Button";
 
 interface GateOpeningProps {
   name: string;
@@ -16,15 +18,6 @@ export function GateOpening({ name, onContinue }: GateOpeningProps) {
   const [knocks, setKnocks] = useState(0);
   const [isOpening, setIsOpening] = useState(false);
   const [knockPulse, setKnockPulse] = useState(0);
-
-  useEffect(() => {
-    if (!isOpening) {
-      return;
-    }
-
-    const timeout = window.setTimeout(onContinue, 1800);
-    return () => window.clearTimeout(timeout);
-  }, [isOpening, onContinue]);
 
   function handleKnock() {
     if (isOpening) {
@@ -52,7 +45,7 @@ export function GateOpening({ name, onContinue }: GateOpeningProps) {
         <motion.button
           type="button"
           onClick={handleKnock}
-          aria-label={isOpening ? "Gate is opening" : `Knock on the gate. ${knocks} of ${KNOCKS_TO_OPEN} knocks done.`}
+          aria-label={isOpening ? "Gate is open" : `Knock on the gate. ${knocks} of ${KNOCKS_TO_OPEN} knocks done.`}
           disabled={isOpening}
           animate={knockPulse ? { x: [0, -5, 5, -3, 3, 0] } : undefined}
           transition={{ duration: 0.34 }}
@@ -68,14 +61,21 @@ export function GateOpening({ name, onContinue }: GateOpeningProps) {
           />
           <div className="absolute left-1/2 top-[52%] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/35 px-4 py-2 text-xs font-semibold text-amber-50 shadow-2xl backdrop-blur-md">
             <Hand className="h-4 w-4" />
-            {isOpening ? "Opening..." : `${knocks}/${KNOCKS_TO_OPEN} knocks`}
+            {isOpening ? "Gate open" : `${knocks}/${KNOCKS_TO_OPEN} knocks`}
           </div>
         </motion.button>
 
-        <div className="mt-5 flex items-center gap-2 text-xs text-pink-100/75">
-          <Sparkles className="h-4 w-4" />
-          {isOpening ? "Gate open ho raha hai..." : "Third knock ke baad surprise start hoga"}
-        </div>
+        {isOpening ? (
+          <Button type="button" onClick={onContinue} className="mt-5">
+            Continue
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        ) : (
+          <div className="mt-5 flex items-center gap-2 text-xs text-pink-100/75">
+            <Sparkles className="h-4 w-4" />
+            Third knock ke baad open gate dikhega
+          </div>
+        )}
       </div>
     </section>
   );
