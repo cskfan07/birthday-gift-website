@@ -6,13 +6,14 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { BalloonReveal } from "@/components/birthday/preview/BalloonReveal";
 import { FinalBirthday } from "@/components/birthday/preview/FinalBirthday";
+import { GateOpening } from "@/components/birthday/preview/GateOpening";
 import { HeartOpening } from "@/components/birthday/preview/HeartOpening";
 import { LetterReveal } from "@/components/birthday/preview/LetterReveal";
 import { MemoryReveal } from "@/components/birthday/preview/MemoryReveal";
 import { Button } from "@/components/ui/Button";
 import type { BirthdayFormData } from "@/types/birthday";
 
-type PreviewScene = "opening" | "balloons" | "memories" | "letter" | "final";
+type PreviewScene = "gate" | "opening" | "balloons" | "memories" | "letter" | "final";
 
 interface BirthdayPreviewProps {
   data: BirthdayFormData;
@@ -21,6 +22,7 @@ interface BirthdayPreviewProps {
 }
 
 const SCENE_LABELS: { id: PreviewScene; label: string }[] = [
+  { id: "gate", label: "Gate" },
   { id: "opening", label: "Opening" },
   { id: "balloons", label: "Reasons" },
   { id: "memories", label: "Memories" },
@@ -117,7 +119,7 @@ async function uploadAudioDirect(dataUrl: string, path: string) {
 }
 
 export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayPreviewProps) {
-  const [scene, setScene] = useState<PreviewScene>("opening");
+  const [scene, setScene] = useState<PreviewScene>("gate");
   const [popped, setPopped] = useState<boolean[]>([false, false, false, false, false]);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -274,7 +276,7 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
           </div>
         ) : null}
 
-        <div className="mb-6 grid grid-cols-5 gap-2 sm:gap-3">
+        <div className="mb-6 grid grid-cols-6 gap-2 sm:gap-3">
           {SCENE_LABELS.map((item, index) => {
             const active = item.id === scene;
             const completed = SCENE_LABELS.findIndex((entry) => entry.id === scene) > index;
@@ -295,6 +297,12 @@ export function BirthdayPreview({ data, onRestart, isShared = false }: BirthdayP
             exit={{ opacity: 0, x: -18 }}
             transition={{ duration: 0.3 }}
           >
+            {scene === "gate" ? (
+              <GateOpening
+                name={data.theirName}
+                onContinue={() => setScene("opening")}
+              />
+            ) : null}
             {scene === "opening" ? (
               <HeartOpening
                 name={data.theirName}
